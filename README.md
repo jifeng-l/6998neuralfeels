@@ -50,7 +50,7 @@ NeuralFeels combines vision, touch, and robot proprioception into a neural field
 ### 1. Clone repository
 
 ```bash
-git clone git@github.com:facebookresearch/neuralfeels.git
+git clone git@github.com:jifeng-l/6998neuralfeels.git
 ```
 
 ### 2. Install the `neuralfeels` environment
