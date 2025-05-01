@@ -12,11 +12,19 @@ user: suddhu
 profile: False
 seed: 1
 gpu_id: 0
+
+# use for headless mode, comment the following line if necessary
+use_gui: False
+open3d: False
+
+
 create_display: False
 expt_name: "${main.train.train_mode}"
 vox_size: "${main.train.gt_voxel_size}"
 
 sweep_dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+
 
 hydra:
   job_logging:

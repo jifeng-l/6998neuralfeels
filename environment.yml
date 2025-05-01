@@ -68,7 +68,7 @@ dependencies:
     - open3d==0.16.0
     - opencv-python
     - pandas==2.0.3
-    - pre-commit-4.0.1
+    - pre-commit==4.0.1
     - pycocotools==2.0.7
     - pyglet==1.5.27
     - pyopengl==3.1.0

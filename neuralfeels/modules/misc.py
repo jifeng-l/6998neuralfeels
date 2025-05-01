@@ -15,6 +15,22 @@ import torch
 from scipy.spatial.transform import Rotation as R
 from termcolor import cprint
 
+from pyvirtualdisplay import Display
+
+class OptionalDisplay:
+    def __init__(self, size=(1900, 1084), use_xauth=True, active=False):
+        self.display = None
+        if active:
+            self.display = Display(size=size, use_xauth=use_xauth)
+
+    def __enter__(self):
+        if self.display is not None:
+            self.display.__enter__()
+            print(f"Display created at :{self.display.display}.")
+
+    def __exit__(self, *args, **kwargs):
+        if self.display is not None:
+            self.display.__exit__()
 
 def print_once(string, bucket=[]):
     """

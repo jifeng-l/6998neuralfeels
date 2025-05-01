@@ -41,6 +41,9 @@ def reduction_batch_based(image_loss, M):
 
     if divisor == 0:
         return 0
+        # 修改了原始逻辑 因为我们不关心segmentation 所以mask全为0非常正常 不需要avoid
+        # return torch.sum(image_loss * 0)
+        # return torch.tensor(0.0, device=image_loss.device, dtype=image_loss.dtype)
     else:
         return torch.sum(image_loss) / divisor
 
@@ -134,6 +137,7 @@ class ScaleAndShiftInvariantLoss(nn.Module):
         self.__prediction_ssi = None
 
     def forward(self, prediction, target):
+        # print("[DEBUG] Entered ScaleAndShiftInvariantLoss.forward")
         # preprocessing
         mask = target > 0
 
@@ -147,7 +151,9 @@ class ScaleAndShiftInvariantLoss(nn.Module):
             total += self.__alpha * self.__regularization_loss(
                 self.__prediction_ssi, target, mask
             )
-
+        # print("===================================")
+        # print("total:", total)
+        # print("type(total):", type(total))
         return total
 
     def __get_prediction_ssi(self):

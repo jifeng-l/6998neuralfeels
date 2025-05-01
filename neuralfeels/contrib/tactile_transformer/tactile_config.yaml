@@ -1,0 +1,33 @@
+General:
+  device: "cuda:0"
+  epochs: 30
+  batch_size: 8
+  lr_backbone: 1e-5
+  lr_scratch: 1e-4
+  optim: "adam"
+  type: "depth"
+  loss_depth: "mse"
+  emb_dim: 768
+  resample_dim: 256
+  read: "project"
+  patch_size: 16
+  hooks: [2, 5, 8, 11]
+  model_timm: "vit_base_patch16_384"
+  path_model: "./checkpoints"
+  model_type: "vit"
+
+Dataset:
+  root: "/root/autodl-tmp/processed_tactile_dataset"
+  classes: [0, 1]        # ← 重新加回
+  col_ext: ".jpg"
+  gt_depth: true
+  transforms:
+    resize: [384, 384]
+
+wandb:
+  enable: false              # 是否开启 WandB；Trainer 会根据这个开/关
+  username: Jifeng  # 你的 WandB 账号名
+  project: DPTModel          # （可选）指定项目名；如果不填，Trainer 默认用 "DPTModel"
+  images_to_show: 4          # 在验证时想在 WandB 展示几张样例
+  im_w: 256                  # 日志里把图片 resize 到多宽
+  im_h: 256 

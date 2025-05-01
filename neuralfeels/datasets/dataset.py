@@ -103,6 +103,7 @@ class TactileDataset(Dataset):
         root_dir: str,
         gt_depth: bool,
         col_ext: str = ".jpg",
+        resize = None
     ):
         """DIGIT dataset loader for neuralfeels dataset"""
         self.rgb_dir = os.path.join(root_dir, "image")
@@ -111,29 +112,83 @@ class TactileDataset(Dataset):
         self.col_ext = col_ext
         self.gt_depth = gt_depth
 
+        if resize != None:
+            self.image_size = resize
+            print(f"images in dataset will resize to {resize}")
+
     def __len__(self):
         return len(os.listdir(self.rgb_dir))
 
     def __getitem__(self, idx):
+        # if torch.is_tensor(idx):
+        #     idx = idx.tolist()
+        # rgb_file = os.path.join(self.rgb_dir, f"{idx:05d}" + self.col_ext)
+        # image = cv2.imread(rgb_file)
+
+        # depth = None
+        # if self.gt_depth:
+        #     depth_file = os.path.join(self.depth_dir, f"{idx:05d}" + self.col_ext)
+        #     mask_file = os.path.join(self.mask_dir, f"{idx:05d}" + self.col_ext)
+        #     depth = cv2.imread(depth_file, 0).astype(np.int64)
+
+        #     depth[depth < 0] = 0
+
+        #     mask = cv2.imread(mask_file, 0).astype(np.int64)
+        #     mask = mask > 255 / 2
+        #     if mask.sum() / mask.size < 0.01:
+        #         # tiny mask, ignore
+        #         mask *= False
+
+        #     depth = depth * mask  # apply contact mask
+        #     # if idx < 5:        # 只看前几张
+        #     #     print("depth min/max:", depth.min(), depth.max())
+        # # image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.
+        # return image, depth
+
+        # 新版 集成了原tensor_loader的归一化 , resize, 及dummy segmentation包装功能
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        rgb_file = os.path.join(self.rgb_dir, f"{idx}" + self.col_ext)
+
+        H, W = self.image_size
+        rgb_file = os.path.join(self.rgb_dir, f"{idx:05d}{self.col_ext}")
+        depth_file = os.path.join(self.depth_dir, f"{idx:05d}{self.col_ext}")
+        mask_file = os.path.join(self.mask_dir, f"{idx:05d}{self.col_ext}")
+
+        # ----------- RGB 图像读取 -----------
         image = cv2.imread(rgb_file)
+        if image is None:
+            raise ValueError(f"[RGB NOT FOUND] {rgb_file}")
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = cv2.resize(image, (W, H))
+        image_tensor = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0  # (3,H,W)
 
-        depth = None
+        # ----------- 深度图读取 + 掩码处理 -----------
+        depth = np.zeros((H, W), dtype=np.float32)
         if self.gt_depth:
-            depth_file = os.path.join(self.depth_dir, f"{idx}" + self.col_ext)
-            mask_file = os.path.join(self.mask_dir, f"{idx}" + self.col_ext)
-            depth = cv2.imread(depth_file, 0).astype(np.int64)
+            try:
+                depth_raw = cv2.imread(depth_file, cv2.IMREAD_UNCHANGED)
+                if depth_raw is None:
+                    raise ValueError(f"[DEPTH NOT FOUND] {depth_file}")
+                depth_raw = depth_raw.astype(np.int64)
+                depth_raw[depth_raw < 0] = 0
 
-            depth[depth < 0] = 0
+                mask = cv2.imread(mask_file, cv2.IMREAD_UNCHANGED)
+                if mask is None:
+                    raise ValueError(f"[MASK NOT FOUND] {mask_file}")
+                mask = (mask.astype(np.int64) > 127)
+                if mask.sum() / mask.size < 0.01:
+                    mask *= False
 
-            mask = cv2.imread(mask_file, 0).astype(np.int64)
-            mask = mask > 255 / 2
-            if mask.sum() / mask.size < 0.01:
-                # tiny mask, ignore
-                mask *= False
+                depth_masked = depth_raw * mask
+                depth_resized = cv2.resize(depth_masked.astype(np.float32), (W, H))
+                depth = depth_resized / 255.0  # normalize
 
-            depth = depth * mask  # apply contact mask
+            except Exception as e:
+                print(f"[⚠️ Depth fallback idx={idx}] {e}")
 
-        return image, depth
+        depth_tensor = torch.from_numpy(depth).unsqueeze(0).float()  # (1,H,W)
+
+        # ----------- Dummy segmentation -----------
+        seg_tensor = torch.zeros_like(depth_tensor, dtype=torch.long)  # (1,H,W)
+
+        return image_tensor, depth_tensor, seg_tensor
