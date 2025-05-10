@@ -1,20 +1,163 @@
+# General:
+#   device: "cuda:0"
+#   epochs: 30
+#   batch_size: 16
+#   lr_backbone: 3e-5
+#   lr_scratch:   3e-4
+#   momentum: 0.9
+#   optim: "adam"
+#   type: "full"
+#   loss_depth: "mse"
+#   loss_segmentation: "ce"  
+
+#   emb_dim: 768
+#   resample_dim: 256
+#   # read: "project"
+#   read: ignore
+#   patch_size: 16
+#   # hook & fusion
+#   hooks:       [5, 11, 17, 23]  # 保持原来你定义的那些层
+#   reassemble_s: [4, 8, 16, 32]  # DPTModel 默认值
+#   transformer_dropout: 0.0
+
+#   model_type: "vit"   # "mamba" / "robust_mamba" / "vit"
+#   model_timm: "vit_base_patch16_384"  
+#   # emb_dim: 1024                # RobustMambaBackbone 里默认 1024
+#   # patch_size: 8                # 更细粒度的 8×8 patch
+#   resample_dim: 256
+#   path_model: "./checkpoints"
+
+
+# Dataset:
+#   root: "/root/autodl-tmp/processed_tactile_dataset"
+#   classes: [0, 1]        # ← 重新加回
+#   col_ext: ".jpg"
+#   gt_depth: true
+#   transforms:
+#     resize: [384, 384]
+
+# wandb:
+#   enable: True              # 是否开启 WandB；Trainer 会根据这个开/关
+#   username: l5603912369  # 你的 WandB 账号名
+#   project: mamba          # （可选）指定项目名；如果不填，Trainer 默认用 "DPTModel"
+#   images_to_show: 4          # 在验证时想在 WandB 展示几张样例
+#   im_w: 256                  # 日志里把图片 resize 到多宽
+#   im_h: 256 
+
+
+mode : vit
+weights: dpt_sim
+
+settings: 
+  real: 
+    blend_sz : 0
+    border : 0
+    ratio : 1.2 # multiplier to decide the contact threshold. Set higher to reduce false positives
+    clip : 10 # sets all heightmap outputs < clip pix to zero. Set higher to reduce noisy predictions
+    batch_size : 1
+    bg_id: null
+
+  sim: 
+    blend_sz : 0
+    border : 0
+    ratio : 0 # multiplier to decide the contact threshold. Set higher to reduce false positives
+    clip : 5 # sets all heightmap outputs < clip pix to zero. Set higher to reduce noisy predictions
+    batch_size : 1
+    bg_id: 10
+
 General:
-  device: "cuda:0"
-  epochs: 30
-  batch_size: 8
-  lr_backbone: 1e-5
-  lr_scratch: 1e-4
-  optim: "adam"
-  type: "depth"
-  loss_depth: "mse"
-  emb_dim: 768
-  resample_dim: 256
-  read: "project"
-  patch_size: 16
-  hooks: [2, 5, 8, 11]
-  model_timm: "vit_base_patch16_384"
-  path_model: "./checkpoints"
-  model_type: "vit"
+    model_type : vit
+    device: cuda
+    type : depth
+    model_timm : vit_small_patch16_224.dino
+    emb_dim : 384
+    hooks : [2, 5, 8, 11]
+    read : projection
+    resample_dim : 128
+    optim : adam
+    lr_backbone : 1e-5
+    lr_scratch : 1e-4
+    loss_depth : mse
+    loss_segmentation : ce
+    momentum : 0.9
+    epochs : 500
+    batch_size : 50
+    path_model : ./checkpoints
+    path_input_images : data/tacto_data/004_sugar_box/00/tactile_images
+    path_predicted_images : output
+    seed : 0
+    patch_size : 16
+
+# Dataset:
+#     paths:
+#         path_dataset : input
+#         list_datasets: [
+#             "002_master_chef_can",
+#             "003_cracker_box",
+#             "007_tuna_fish_can",
+#             "008_pudding_box",
+#             "009_gelatin_box",
+#             "010_potted_meat_can",
+#             "011_banana",
+#             "012_strawberry",
+#             "013_apple",
+#             "014_lemon",
+#             "015_peach",
+#             "016_pear",
+#             "017_orange",
+#             "018_plum",
+#             "019_pitcher_base",
+#             "024_bowl",
+#             "026_sponge",
+#             "029_plate",
+#             "030_fork",
+#             "031_spoon",
+#             "032_knife",
+#             "033_spatula",
+#             "036_wood_block",
+#             "040_large_marker",
+#             "044_flat_screwdriver",
+#             "050_medium_clamp",
+#             "051_large_clamp",
+#             "052_extra_large_clamp",
+#             "053_mini_soccer_ball",
+#             "054_softball",
+#             "056_tennis_ball",
+#             "057_racquetball",
+#             "058_golf_ball",
+#             "061_foam_brick",
+#             "062_dice",
+#             "065-a_cups",
+#             "065-b_cups",
+#             "070-a_colored_wood_blocks",
+#             "072-a_toy_airplane",
+#             "077_rubiks_cube"]
+#         path_images : tactile_images
+#         path_segmentations : gt_contactmasks
+#         path_depths : gt_heightmaps
+#     extensions :
+#         ext_images : .jpg
+#         ext_segmentations : .jpg
+#         ext_depths : .jpg
+#     splits:
+#         split_train : 0.6
+#         split_val : 0.2
+#         split_test : 0.2
+#     transforms:
+#         resize : [224, 224]
+#         p_flip : 0.0
+#         p_crop : 0.0
+#         p_rot : 0.0
+#     classes:
+#         "1":
+#             name: contact
+#             color: 255
+# wandb :
+#     enable : true
+#     username : suddhu
+#     images_to_show : 5
+#     im_h : 640
+#     im_w : 480
 
 Dataset:
   root: "/root/autodl-tmp/processed_tactile_dataset"
@@ -23,11 +166,3 @@ Dataset:
   gt_depth: true
   transforms:
     resize: [384, 384]
-
-wandb:
-  enable: false              # 是否开启 WandB；Trainer 会根据这个开/关
-  username: Jifeng  # 你的 WandB 账号名
-  project: DPTModel          # （可选）指定项目名；如果不填，Trainer 默认用 "DPTModel"
-  images_to_show: 4          # 在验证时想在 WandB 展示几张样例
-  im_w: 256                  # 日志里把图片 resize 到多宽
-  im_h: 256 

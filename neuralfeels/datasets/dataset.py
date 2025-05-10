@@ -120,6 +120,7 @@ class TactileDataset(Dataset):
         return len(os.listdir(self.rgb_dir))
 
     def __getitem__(self, idx):
+        # 旧版
         # if torch.is_tensor(idx):
         #     idx = idx.tolist()
         # rgb_file = os.path.join(self.rgb_dir, f"{idx:05d}" + self.col_ext)
@@ -148,47 +149,51 @@ class TactileDataset(Dataset):
         # 新版 集成了原tensor_loader的归一化 , resize, 及dummy segmentation包装功能
         if torch.is_tensor(idx):
             idx = idx.tolist()
-
         H, W = self.image_size
-        rgb_file = os.path.join(self.rgb_dir, f"{idx:05d}{self.col_ext}")
-        depth_file = os.path.join(self.depth_dir, f"{idx:05d}{self.col_ext}")
-        mask_file = os.path.join(self.mask_dir, f"{idx:05d}{self.col_ext}")
+        name = f"{idx:05d}{self.col_ext}"
+        rgb_path   = os.path.join(self.rgb_dir,   name)
+        depth_path = os.path.join(self.depth_dir, name)
+        mask_path  = os.path.join(self.mask_dir,  name)
 
-        # ----------- RGB 图像读取 -----------
-        image = cv2.imread(rgb_file)
-        if image is None:
-            raise ValueError(f"[RGB NOT FOUND] {rgb_file}")
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = cv2.resize(image, (W, H))
-        image_tensor = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0  # (3,H,W)
+        # 2) 读 RGB + resize + to tensor
+        img = cv2.imread(rgb_path, cv2.IMREAD_COLOR)
+        if img is None:
+            raise FileNotFoundError(f"RGB not found: {rgb_path}")
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = cv2.resize(img, (W, H), interpolation=cv2.INTER_LINEAR)
+        image_tensor = torch.from_numpy(img).permute(2,0,1).float().div(255.0)  # (3,H,W)
 
-        # ----------- 深度图读取 + 掩码处理 -----------
-        depth = np.zeros((H, W), dtype=np.float32)
+        # 3) 读 Depth + mask 后处理
+        depth_np = np.zeros((H, W), dtype=np.float32)
         if self.gt_depth:
-            try:
-                depth_raw = cv2.imread(depth_file, cv2.IMREAD_UNCHANGED)
-                if depth_raw is None:
-                    raise ValueError(f"[DEPTH NOT FOUND] {depth_file}")
-                depth_raw = depth_raw.astype(np.int64)
-                depth_raw[depth_raw < 0] = 0
+            raw = cv2.imread(depth_path, cv2.IMREAD_UNCHANGED)
+            if raw is None:
+                raise FileNotFoundError(f"Depth not found: {depth_path}")
+            raw = raw.astype(np.int64)
+            raw[raw < 0] = 0
 
-                mask = cv2.imread(mask_file, cv2.IMREAD_UNCHANGED)
-                if mask is None:
-                    raise ValueError(f"[MASK NOT FOUND] {mask_file}")
-                mask = (mask.astype(np.int64) > 127)
-                if mask.sum() / mask.size < 0.01:
-                    mask *= False
+            m = cv2.imread(mask_path, cv2.IMREAD_UNCHANGED)
+            if m is None:
+                raise FileNotFoundError(f"Mask not found: {mask_path}")
+            m = (m.astype(np.int64) > 127)  # bool mask
+            # 如果接触区域太小，就当全无接触
+            if m.sum() / m.size < 0.01:
+                m[:] = False
 
-                depth_masked = depth_raw * mask
-                depth_resized = cv2.resize(depth_masked.astype(np.float32), (W, H))
-                depth = depth_resized / 255.0  # normalize
+            masked = raw * m
+            resized = cv2.resize(masked.astype(np.float32), (W, H),
+                                 interpolation=cv2.INTER_NEAREST)
+            depth_np = resized / 255.0
 
-            except Exception as e:
-                print(f"[⚠️ Depth fallback idx={idx}] {e}")
+        depth_tensor = torch.from_numpy(depth_np).unsqueeze(0).float()  # (1,H,W)
 
-        depth_tensor = torch.from_numpy(depth).unsqueeze(0).float()  # (1,H,W)
-
-        # ----------- Dummy segmentation -----------
-        seg_tensor = torch.zeros_like(depth_tensor, dtype=torch.long)  # (1,H,W)
+        # 4) 读 Mask → segmentation label  
+        #    0=background, 1=contact
+        m = cv2.imread(mask_path, cv2.IMREAD_UNCHANGED)
+        if m is None:
+            raise FileNotFoundError(f"Mask not found for segmentation: {mask_path}")
+        m = (m.astype(np.int64) > 127).astype(np.uint8)
+        m_resized = cv2.resize(m, (W, H), interpolation=cv2.INTER_NEAREST)
+        seg_tensor = torch.from_numpy(m_resized).long().unsqueeze(0)  # (1,H,W)
 
         return image_tensor, depth_tensor, seg_tensor

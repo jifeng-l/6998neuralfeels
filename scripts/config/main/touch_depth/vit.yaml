@@ -40,13 +40,15 @@ General:
     epochs : 500
     batch_size : 50
     path_model : data/tactile_transformer
-    path_input_images : data/tacto_data/004_sugar_box/00/tactile_images
+    # path_input_images : data/tacto_data/004_sugar_box/00/tactile_images  原版
+    path_input_images : /root/autodl-tmp/6998neuralfeels/data/tacto_data
     path_predicted_images : output
     seed : 0
     patch_size : 16
 
 Dataset:
     paths:
+        root : /root/autodl-tmp/processed_tactile_dataset
         path_dataset : input
         list_datasets: [
             "002_master_chef_can",
@@ -89,9 +91,9 @@ Dataset:
             "070-a_colored_wood_blocks",
             "072-a_toy_airplane",
             "077_rubiks_cube"]
-        path_images : tactile_images
-        path_segmentations : gt_contactmasks
-        path_depths : gt_heightmaps
+        path_images : image
+        path_segmentations : mask
+        path_depths : depth
     extensions :
         ext_images : .jpg
         ext_segmentations : .jpg
@@ -115,3 +117,4 @@ wandb :
     images_to_show : 5
     im_h : 640
     im_w : 480
+

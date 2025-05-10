@@ -47,6 +47,7 @@ class Trainer(object):
         self.model.to(self.device)
 
         path_model = os.path.join(config["General"]["path_model"], "DPTModel111.p")
+        # path_model = os.path.join(config["General"]["path_model"], "dpt_sim.p")
         if os.path.exists(path_model):
             self.model.load_state_dict(torch.load(path_model, map_location=self.device)["model_state_dict"])
             print(f"✅ Loaded pretrained model from {path_model}")
@@ -272,10 +273,10 @@ class Trainer(object):
                 )
                 output_depths, output_segmentations = self.model(X)
                 assert output_depths is not None, "output_depths is None"
-                assert output_segmentations is not None, "output_segmentations is None"
-                if i==0:
-                    print(f"===the sample image is {X}===")
-                    print(f"===the sample depth is {Y_depths}===")
+                # assert output_segmentations is not None, "output_segmentations is None"
+                # if i==0:
+                #     print(f"===the sample image is {X}===")
+                #     print(f"===the sample depth is {Y_depths}===")
                 output_depths = (
                     output_depths.squeeze(1) if output_depths != None else None
                 )

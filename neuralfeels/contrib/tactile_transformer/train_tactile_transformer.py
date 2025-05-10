@@ -17,66 +17,6 @@ def parse_args():
     )
     return parser.parse_args()
 
-def tensor_loader(loader, image_size=(384,384), device="cuda:0"):
-    """
-    归一化values 并添加dummy segmentation label 以适配DPT model的需要 （原dataset无segmentation label）
-    loader: DataLoader yielding (list_of_images, list_of_depths)
-    输出: generator yielding (Xb, Yd, Ys)
-      Xb: (B,3,H,W) RGB in [0,1]
-      Yd: (B,1,H,W) depth in [0,1]
-      Ys: dummy seg (全 0)
-    """
-    H, W = image_size
-    for batch in loader:
-        imgs_np, deps = batch
-        rgb_tensors, dep_tensors = [], []
-
-        for img_np, dep in zip(imgs_np, deps):
-            # --------- RGB ----------
-            arr = img_np.cpu().numpy() if isinstance(img_np, torch.Tensor) else img_np
-            arr = cv2.resize(arr, (W, H))
-            t_img = torch.from_numpy(arr).permute(2, 0, 1).float().div(255.0)
-            rgb_tensors.append(t_img)
-
-            # --------- DEPTH --------
-            dn = None
-            try:
-                # print(f"[DEBUG] Depth input type: {type(dep)}, shape: {getattr(dep, 'shape', 'N/A')}")
-
-                if isinstance(dep, torch.Tensor):
-                    dn = dep.cpu().numpy()
-                elif isinstance(dep, np.ndarray):
-                    dn = dep
-                else:
-                    raise ValueError("Unsupported depth input type")
-
-                dn = np.squeeze(dn)  # remove singleton dimensions
-                if dn.ndim != 2:
-                    raise ValueError(f"Expected 2D depth, got shape {dn.shape}")
-
-                # convert dtype if necessary
-                if dn.dtype == np.bool_:
-                    dn = dn.astype(np.uint8) * 255
-                elif dn.dtype not in [np.uint8, np.float32]:
-                    dn = dn.astype(np.float32)
-
-                dn = cv2.resize(dn, (W, H))
-
-            except Exception as e:
-                print(f"[⚠️ Depth fallback] {e}, replacing with zeros")
-                dn = np.zeros((H, W), dtype=np.float32)
-
-            t_dep = torch.from_numpy(dn).unsqueeze(0).float().div(255.0)
-            dep_tensors.append(t_dep)
-
-        if len(rgb_tensors) == 0:
-            continue
-
-        Xb = torch.stack(rgb_tensors, dim=0).to(device)
-        Yd = torch.stack(dep_tensors, dim=0).to(device)
-        Ys = torch.zeros_like(Yd, dtype=torch.long, device=device)
-        yield Xb, Yd, Ys
-        
         
 def main():
     args = parse_args()
@@ -131,9 +71,9 @@ def main():
     # )
 
     # 测试新dataset get item 无需tensor_loader
-    trainer.train(
-        train_loader, 
-        val_loader)
+    # trainer.train(
+    #     train_loader, 
+    #     val_loader)
 
 
     # 最后在验证集做一次完整 eval 并输出
