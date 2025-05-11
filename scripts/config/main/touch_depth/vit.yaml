@@ -3,6 +3,123 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+# mode : vit
+# weights: dpt_real
+
+# settings: 
+#   real: 
+#     blend_sz : 0
+#     border : 0
+#     ratio : 1.2 # multiplier to decide the contact threshold. Set higher to reduce false positives
+#     clip : 10 # sets all heightmap outputs < clip pix to zero. Set higher to reduce noisy predictions
+#     batch_size : 1
+#     bg_id: null
+
+#   sim: 
+#     blend_sz : 0
+#     border : 0
+#     ratio : 0 # multiplier to decide the contact threshold. Set higher to reduce false positives
+#     clip : 5 # sets all heightmap outputs < clip pix to zero. Set higher to reduce noisy predictions
+#     batch_size : 1
+#     bg_id: 10
+
+# General:
+#     device: cuda
+#     type : depth
+#     model_timm : vit_small_patch16_224.dino
+#     emb_dim : 384
+#     hooks : [2, 5, 8, 11]
+#     read : projection
+#     resample_dim : 128
+#     optim : adam
+#     lr_backbone : 1e-5
+#     lr_scratch : 1e-4
+#     loss_depth : mse
+#     loss_segmentation : ce
+#     momentum : 0.9
+#     epochs : 500
+#     batch_size : 50
+#     path_model : data/tactile_transformer
+#     # path_input_images : data/tacto_data/004_sugar_box/00/tactile_images  原版
+#     path_input_images : /root/autodl-tmp/6998neuralfeels/data/tacto_data
+#     path_predicted_images : output
+#     seed : 0
+#     patch_size : 16
+
+# Dataset:
+#     paths:
+#         root : /root/autodl-tmp/processed_tactile_dataset
+#         path_dataset : input
+#         list_datasets: [
+#             "002_master_chef_can",
+#             "003_cracker_box",
+#             "007_tuna_fish_can",
+#             "008_pudding_box",
+#             "009_gelatin_box",
+#             "010_potted_meat_can",
+#             "011_banana",
+#             "012_strawberry",
+#             "013_apple",
+#             "014_lemon",
+#             "015_peach",
+#             "016_pear",
+#             "017_orange",
+#             "018_plum",
+#             "019_pitcher_base",
+#             "024_bowl",
+#             "026_sponge",
+#             "029_plate",
+#             "030_fork",
+#             "031_spoon",
+#             "032_knife",
+#             "033_spatula",
+#             "036_wood_block",
+#             "040_large_marker",
+#             "044_flat_screwdriver",
+#             "050_medium_clamp",
+#             "051_large_clamp",
+#             "052_extra_large_clamp",
+#             "053_mini_soccer_ball",
+#             "054_softball",
+#             "056_tennis_ball",
+#             "057_racquetball",
+#             "058_golf_ball",
+#             "061_foam_brick",
+#             "062_dice",
+#             "065-a_cups",
+#             "065-b_cups",
+#             "070-a_colored_wood_blocks",
+#             "072-a_toy_airplane",
+#             "077_rubiks_cube"]
+#         path_images : image
+#         path_segmentations : mask
+#         path_depths : depth
+#     extensions :
+#         ext_images : .jpg
+#         ext_segmentations : .jpg
+#         ext_depths : .jpg
+#     splits:
+#         split_train : 0.6
+#         split_val : 0.2
+#         split_test : 0.2
+#     transforms:
+#         resize : [224, 224]
+#         p_flip : 0.0
+#         p_crop : 0.0
+#         p_rot : 0.0
+#     classes:
+#         "1":
+#             name: contact
+#             color: 255
+# wandb :
+#     enable : true
+#     username : suddhu
+#     images_to_show : 5
+#     im_h : 640
+#     im_w : 480
+
+
+# 新版
 mode : vit
 weights: dpt_real
 
@@ -25,30 +142,37 @@ settings:
 
 General:
     device: cuda
-    type : depth
-    model_timm : vit_small_patch16_224.dino
+    type : full
+    model_timm : vit_small_patch16_224.dino # vit_small_patch16_384.dino
     emb_dim : 384
     hooks : [2, 5, 8, 11]
     read : projection
     resample_dim : 128
     optim : adam
-    lr_backbone : 1e-5
+    # 原设置
+    lr_backbone : 1e-5   
     lr_scratch : 1e-4
+    # 测试设置
+    # lr_backbone : 1e-4   
+    # lr_scratch : 1e-3   
     loss_depth : mse
     loss_segmentation : ce
     momentum : 0.9
-    epochs : 500
-    batch_size : 50
-    path_model : data/tactile_transformer
-    # path_input_images : data/tacto_data/004_sugar_box/00/tactile_images  原版
-    path_input_images : /root/autodl-tmp/6998neuralfeels/data/tacto_data
+    epochs : 10
+    batch_size : 64
+    # path_model : /root/autodl-tmp/6998neuralfeels/data/tactile_transformer/dpt_real.p  # repo自带weights 
+    path_model : /root/autodl-tmp/6998neuralfeels/neuralfeels/contrib/tactile_transformer/data/tactile_mamba   
+    # path_model : None  # 不要使用pretrained weights 从0开始训练
+    path_input_images : data/tacto_data/004_sugar_box/00/tactile_images
     path_predicted_images : output
     seed : 0
     patch_size : 16
+    gt_depth : True   # True表示训练 False表示推理
+    backbone_type : "mamba"  # 或者mamba,vit
 
 Dataset:
     paths:
-        root : /root/autodl-tmp/processed_tactile_dataset
+        root: /root/autodl-tmp/processed_tactile_dataset
         path_dataset : input
         list_datasets: [
             "002_master_chef_can",
@@ -91,9 +215,9 @@ Dataset:
             "070-a_colored_wood_blocks",
             "072-a_toy_airplane",
             "077_rubiks_cube"]
-        path_images : image
-        path_segmentations : mask
-        path_depths : depth
+        path_images : tactile_images
+        path_segmentations : gt_contactmasks
+        path_depths : gt_heightmaps
     extensions :
         ext_images : .jpg
         ext_segmentations : .jpg
@@ -103,18 +227,22 @@ Dataset:
         split_val : 0.2
         split_test : 0.2
     transforms:
-        resize : [224, 224]
-        p_flip : 0.0
-        p_crop : 0.0
-        p_rot : 0.0
+        resize : [224, 224] # [384, 384]
+        p_flip : 0.5
+        p_crop : 0.3
+        p_rot : 0.2
     classes:
+        "0":
+            name: background
+            color: 0
         "1":
             name: contact
             color: 255
-wandb :
-    enable : true
-    username : suddhu
-    images_to_show : 5
-    im_h : 640
-    im_w : 480
-
+wandb:
+  enable: True              # 是否开启 WandB；Trainer 会根据这个开/关
+  username: l5603912369  # 你的 WandB 账号名
+  entity : 6998robot
+  project: tactile_trans          # （可选）指定项目名；如果不填，Trainer 默认用 "DPTModel"
+  images_to_show: 5          # 在验证时想在 WandB 展示几张样例
+  im_w: 640                 # 日志里把图片 resize 到多宽
+  im_h: 480 

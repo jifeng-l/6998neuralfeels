@@ -22,26 +22,32 @@ def main():
     args = parse_args()
     cfg = yaml.safe_load(open(args.config, "r"))
 
-    # 确保 lr 是 float
+    # Ensure lr is float
     cfg["General"]["lr_backbone"] = float(cfg["General"]["lr_backbone"])
     cfg["General"]["lr_scratch"]  = float(cfg["General"]["lr_scratch"])
 
     device = cfg["General"].get("device", "cuda:0")
     print("Running on device:", device)
 
-    # 数据路径 & 参数
-    root    = cfg["Dataset"]["root"]
-    col_ext = cfg["Dataset"].get("col_ext", ".jpg")
-    gt_d    = cfg["Dataset"].get("gt_depth", True)
-    resize  = tuple(cfg["Dataset"]["transforms"]["resize"])
+    # Data path & parameters
+    # root    = cfg["Dataset"]["root"]
+    # col_ext = cfg["Dataset"].get("col_ext", ".jpg")
+    # gt_d    = cfg["Dataset"].get("gt_depth", True)
+    # resize  = tuple(cfg["Dataset"]["transforms"]["resize"])
 
-    # PyTorch Dataset + DataLoader
-    # train_ds = TactileDataset(os.path.join(root, "train"), gt_d, col_ext)
-    # val_ds   = TactileDataset(os.path.join(root,   "val"),   gt_d, col_ext)
+    # new versiton
+    root    = cfg["Dataset"]["paths"]["root"]
+    gt_d = cfg["General"]["gt_depth"]
+    col_ext = ".jpg"
+    resize = tuple(cfg["Dataset"]["transforms"]["resize"])
 
-    # 测试集成版dataset 需要传入resize
-    train_ds = TactileDataset(os.path.join(root, "train"), gt_d, col_ext, tuple(resize))
-    val_ds   = TactileDataset(os.path.join(root,   "val"),   gt_d, col_ext, tuple(resize))
+    # Test integrated version dataset requires passing resize
+    # train_ds = TactileDataset(os.path.join(root, "train"), gt_d, col_ext, tuple(resize))
+    # val_ds   = TactileDataset(os.path.join(root,   "val"),   gt_d, col_ext, tuple(resize))
+
+    # new versiton
+    train_ds = TactileDataset(os.path.join(root, "train"), gt_d, col_ext, resize, cfg)
+    val_ds   = TactileDataset(os.path.join(root,   "val"), gt_d, col_ext, resize, cfg)
 
 
     bs = cfg["General"]["batch_size"]
@@ -49,7 +55,7 @@ def main():
         train_ds,
         batch_size=bs,
         shuffle=True,
-        num_workers=4,     # 调试期先零线程，定位问题。确认无误后可改回 4
+        num_workers=4,     # Debugging: Set to 0 first to locate issues. Once confirmed, set back to 4
         pin_memory=True,
         drop_last=True,
     )
@@ -61,29 +67,27 @@ def main():
         pin_memory=True,
     )
     print(f"intializing dataloaders, train loader {len(train_loader)} batches, val loader {len(val_loader)} batches")
-    # Trainer 实例化
+    # Initialize Trainer
     trainer = Trainer(cfg)
 
-    # 进入训练
+    # # Enter training
     # trainer.train(
-    #     tensor_loader(train_loader, image_size=resize, device=device),
-    #     tensor_loader(val_loader,   image_size=resize, device=device),
+    #     train_loader,
+    #     val_loader
     # )
 
-    # 测试新dataset get item 无需tensor_loader
-    # trainer.train(
-    #     train_loader, 
-    #     val_loader)
+    # Test new dataset get item without tensor_loader
+    trainer.train(train_loader, val_loader)
 
 
-    # 最后在验证集做一次完整 eval 并输出
+    # Final evaluation on validation set
     print("\n=== Final evaluation on validation set ===")
     final_loss = trainer.run_eval(
         val_loader
     )
     print(f"Validation loss: {final_loss:.4f}")
 
-    # 保存最终模型快照
+    # Save final model snapshot
     trainer.save_model("final")
     print("Saved final model snapshot.")
 

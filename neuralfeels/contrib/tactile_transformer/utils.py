@@ -117,7 +117,8 @@ def get_losses(config):
     type = config["General"]["type"]
     if type == "full" or type == "depth":
         if config["General"]["loss_depth"] == "mse":
-            loss_depth = nn.L1Loss()
+            # loss_depth = nn.L1Loss()
+            loss_depth = nn.MSELoss()
         elif config["General"]["loss_depth"] == "ssi":
             loss_depth = ScaleAndShiftInvariantLoss()
     if type == "full" or type == "segmentation":

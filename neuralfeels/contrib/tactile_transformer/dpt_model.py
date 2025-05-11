@@ -54,7 +54,7 @@ class DPTModel(nn.Module):
                 num_layers=num_layers_encoder
             )
         if model_type == "robust_mamba":
-            self.backbone = RobustMambaBackbone(
+            self.transformer_encoders = RobustMambaBackbone(
                 image_size=(3,384,384), 
                 patch_size=8, 
                 emb_dim=1024, 
