@@ -53,15 +53,19 @@ class DPTModel(nn.Module):
                 emb_dim=emb_dim,
                 num_layers=num_layers_encoder
             )
+            print("self.transformer_encoders: ", self.transformer_encoders)
         if model_type == "robust_mamba":
             self.transformer_encoders = RobustMambaBackbone(
-                image_size=(3,384,384), 
-                patch_size=8, 
-                emb_dim=1024, 
-                num_layers=24
-            )
-        else:
+                    image_size=image_size,
+                    patch_size=patch_size,
+                    emb_dim=emb_dim,
+                    num_layers=num_layers_encoder,
+                    hooks=hooks,
+                )
+            print("self.transformer_encoders: ", self.transformer_encoders)
+        elif model_type == "vit":
             self.transformer_encoders = timm.create_model(model_timm, pretrained=pretrained)
+            print("self.transformer_encoders: ", self.transformer_encoders)
         self.type_ = type
 
         # Register hooks

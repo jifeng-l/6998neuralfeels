@@ -1,0 +1,46 @@
+{
+  "os": "Linux-5.15.0-94-generic-x86_64-with-glibc2.35",
+  "python": "CPython 3.10.8",
+  "startedAt": "2025-05-12T04:17:47.151031Z",
+  "args": [
+    "--config",
+    "/root/autodl-tmp/6998neuralfeels/scripts/config/main/touch_depth/vit.yaml"
+  ],
+  "program": "/root/autodl-tmp/6998neuralfeels/neuralfeels/contrib/tactile_transformer/train_tactile_transformer.py",
+  "codePath": "neuralfeels/contrib/tactile_transformer/train_tactile_transformer.py",
+  "git": {
+    "remote": "git@github.com:jifeng-l/6998neuralfeels.git",
+    "commit": "1f456ee4a0588ebcf3d430c1ed5e5281cf92a6dd"
+  },
+  "email": "L5603912369@outlook.com",
+  "root": "/root/autodl-tmp/6998neuralfeels/neuralfeels/contrib/tactile_transformer",
+  "host": "autodl-container-c1f149b50c-ce550674",
+  "executable": "/root/miniconda3/bin/python",
+  "codePathLocal": "train_tactile_transformer.py",
+  "cpu_count": 64,
+  "cpu_count_logical": 128,
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "32212254720",
+      "used": "29011337216"
+    }
+  },
+  "memory": {
+    "total": "1081820299264"
+  },
+  "cpu": {
+    "count": 64,
+    "countLogical": 128
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 4090",
+      "memoryTotal": "25757220864",
+      "cudaCores": 16384,
+      "architecture": "Ada"
+    }
+  ],
+  "cudaVersion": "12.6"
+}
