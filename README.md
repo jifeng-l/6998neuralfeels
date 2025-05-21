@@ -1,49 +1,8 @@
-<h1 align="center"><img src=".github/logo.svg"
-    width=30px>
-      NeuralFeels with neural fields <br/>
-      <small>Visuo-tactile perception for in-hand manipulation</small></h1>
-</h1>
+## What is in this repo
+A course project based on NeuralFeels. Check the original repo at https://github.com/facebookresearch/neuralfeels.
 
-<div align="center">
-  <a href="http://www.cs.cmu.edu/~sudhars1/" target="_blank">Sudharshan Suresh</a> &nbsp;•&nbsp;
-  <a href="https://haozhi.io/" target="_blank">Haozhi Qi</a> &nbsp;•&nbsp;
-  <a href="https://scholar.google.com/citations?user=9bt2Z5QAAAAJ&hl=en" target="_blank">Tingfan Wu</a> &nbsp;•&nbsp;
-  <a href="https://scholar.google.com/citations?user=3PJeg1wAAAAJ&hl=en" target="_blank">Taosha Fan</a> &nbsp;•&nbsp;
-  <a href="https://scholar.google.com/citations?user=rebEn8oAAAAJ&hl=en" target="_blank">Luis Pineda</a> &nbsp;•&nbsp;
-  <a href="https://scholar.google.com/citations?user=p6DCMrQAAAAJ&hl=en" target="_blank">Mike Lambeta</a> &nbsp;•&nbsp;
-  <a href="https://people.eecs.berkeley.edu/~malik/" target="_blank">Jitendra Malik</a> <br/>
-  <a href="https://scholar.google.com/citations?user=DMTuJzAAAAAJ&hl=en" target="_blank">Mrinal Kalakrishnan</a> &nbsp;•&nbsp;
-  <a href="https://scholar.google.ch/citations?user=fA0rYxMAAAAJ&hl=en" target="_blank">Roberto Calandra</a> &nbsp;•&nbsp;
-  <a href="https://www.cs.cmu.edu/~kaess/" target="_blank">Michael Kaess</a> &nbsp;•&nbsp;
-  <a href="https://joeaortiz.github.io/" target="_blank">Joseph Ortiz</a> &nbsp;•&nbsp;
-  <a href="https://www.mustafamukadam.com/" target="_blank">Mustafa Mukadam</a>
-  <br/> <br/>
-  <a href="http://www.science.org/doi/10.1126/scirobotics.adl0628">Science Robotics</a>, Nov 2024</a>
-</div>
-
-<h4 align="center">
-  <a href="https://suddhu.github.io/neural-feels/"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c0/Web.svg" alt="Website" width="10px"/> <b>Website</b></a> &nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="http://www.science.org/doi/10.1126/scirobotics.adl0628"><img src=".github/s.svg" alt="Science Journal" width="8px"/> <b>Paper</b></a> &nbsp;&nbsp;&nbsp; &nbsp;
-  <a href="https://youtu.be/KOHh0awhSEg?si=sjSEdC54lKEY3hFy"><img src="https://upload.wikimedia.org/wikipedia/commons/4/42/YouTube_icon_%282013-2017%29.png" alt="YouTube" width="15px"/> <b>Presentation</b></a> &nbsp;&nbsp;&nbsp; &nbsp;
-  🤗 <a href="https://huggingface.co/datasets/suddhu/Feelsight"> <b>Dataset</b></a> + <a href="https://huggingface.co/suddhu/tactile_transformer">Models</a>
-</h4>
-
-<div align="center">
-<b>TL;DR</b>:  Neural perception with vision and touch yields robust tracking <br/>
-and reconstruction of novel objects for in-hand manipulation.
-<br> <br>
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) &nbsp; [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) &nbsp; <a href="https://huggingface.co/collections/suddhu/neuralfeels-673184a97ddcac2df69ff489"><img src="https://img.shields.io/badge/Models%20and%20datasets-Link-yellow?logo=huggingface"></img></a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img height="20" src=".github/fair.png" alt="Meta-AI" />  &nbsp;&nbsp; <img height="22" src=".github/cmu.svg" alt="CMU" /> &nbsp;&nbsp; <img height="22" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Seal_of_University_of_California%2C_Berkeley.svg/600px-Seal_of_University_of_California%2C_Berkeley.svg.png" alt="Berkeley" />  &nbsp;&nbsp; <img height="22" src="https://suddhu.github.io/neural-feels/img/tu_dresden.svg" alt="Dresden" /> &nbsp;&nbsp; <img height="22" src="https://suddhu.github.io/neural-feels/img/ceti.png" alt="ceti" />  
-</div>
-
-NeuralFeels combines vision, touch, and robot proprioception into a neural field optimization. Here, we apply it towards in-hand rotation of novel objects.  For details and further results, refer to our <a href="https://suddhu.github.io/neural-feels/">website</a> and <a href="http://www.science.org/doi/10.1126/scirobotics.adl0628"> journal paper</a>. Also see: [FeelSight dataset](./data/README.md) and [Tactile transformer](./neuralfeels/contrib/tactile_transformer/README.md) READMEs. 
-
-
-<div align="center">
-  <img src=".github/preview.gif"
-  width="90%">
-</div>
-
+### What we have done
+Build a retrain framework for and apply mamba backbone with the perception module - tactile transformer, which is a vision transformer trained with tactile sensor dataset.
 
 ## Setup
 
@@ -152,35 +111,3 @@ neuralfeels
 ├── outputs           # artifacts from training runs
 └── scripts           # main run script and hydra confids
 ```
-
-## Citing NeuralFeels
-
-If you find NeuralFeels useful in your research, please consider citing our paper:
-
-```bibtex
-@article{suresh2024neuralfeels,
-  title={{N}eural feels with neural fields: {V}isuo-tactile perception for in-hand manipulation},
-  author={Suresh, Sudharshan and Qi, Haozhi and Wu, Tingfan and Fan, Taosha and Pineda, Luis and Lambeta, Mike and Malik, Jitendra and Kalakrishnan, Mrinal and Calandra, Roberto and Kaess, Michael and Ortiz, Joseph and Mukadam, Mustafa},
-  journal={Science Robotics},
-  pages={adl0628},
-  year={2024},
-  publisher={American Association for the Advancement of Science}
-}
-```
-
-## License
-
-This project is licensed under [LICENSE](./LICENSE).
-
-## Contributing
-
-We actively welcome your pull requests! Please see [CONTRIBUTING.md](.github/CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md) for more info.
-
-## Acknowledgements
-
-- Our neural rendering and Open3D visualizer are based on [iSDF](https://github.com/facebookresearch/iSDF) by [Joe Ortiz](https://joeaortiz.github.io/) and others;
-- For in-hand rotation, we train a [HORA](https://github.com/HaozhiQi/hora) policy by [Haozhi Qi](https://haozhi.io/) and others;
-- We thank the [DIGIT](https://digit.ml/) team for the vision-based touch sensors, [TACTO](https://github.com/facebookresearch/tacto) for tactile sensor simulation, [Theseus](https://github.com/facebookresearch/theseus) for the PyTorch-friendly optimizer, [DPT](https://github.com/isl-org/DPT) and [FocusOnDepth](https://github.com/antocad/FocusOnDepth) for the transformer architecture, [Segment-anything](https://segment-anything.com/) for prompt-based segmentation, [Helper3D](https://github.com/Jianghanxiao/Helper3D) for URDF-visualization in Open3D; 
-- Some of our mesh models are sourced from [YCB](https://www.ycbbenchmarks.com/) and [ContactDB](https://contactdb.cc.gatech.edu/).
-
-We thank Dhruv Batra, Theophile Gervet, Akshara Rai for feedback on the writing, and Wei Dong, Tess Hellebrekers, Carolina Higuera, Patrick Lancaster, Franziska Meier, Alberto Rodriguez, Akash Sharma, Jessica Yin for helpful discussions on the research.
